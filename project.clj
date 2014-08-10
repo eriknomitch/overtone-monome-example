@@ -1,5 +1,6 @@
 (defproject example "1.0"
   :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/core.match "0.2.1"]
                  [overtone "0.9.1"]
                  [org.clojure/data.json "0.2.3"]
                  [clj-native "0.9.3"]

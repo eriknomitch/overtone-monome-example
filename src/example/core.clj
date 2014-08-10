@@ -2,15 +2,18 @@
   (:use [overtone.live])
   (:use [overtone.sc.machinery.synthdef])
   (:use [clojure.pprint])
+  (:use [clojure.core.match :only [match]])
   (:use [polynome.core :as poly]))
 
 ; ------------------------------------------------
 ; SYNTHS -----------------------------------------
 ; ------------------------------------------------
-(defsynth kick-drum [amp 1 decay 0.8 freq 45 attack 10]
+(definst kick-drum [amp 1 decay 0.8 freq 45 attack 10]
   (let [env (env-gen (perc 0 decay) 1 1 0 1 FREE)
         snd (sin-osc freq (* Math/PI 0.5))]
     (out 0 (pan2 (* snd env) 0))))
+
+(kick-drum)
 
 ; ------------------------------------------------
 ; METRONOMES -------------------------------------
@@ -29,11 +32,18 @@
 ; MAIN -------------------------------------------
 ; ------------------------------------------------
 (def m (poly/init "/dev/tty.usbserial-m64-1113"))
+
 (poly/remove-all-callbacks m)
 
 (poly/toggle-led m 0 0)
 
+(poly/on-press m ::foo (fn [x y s]
+                         (match [x y]
+                           [0 0] (kick-drum))))
+
+
 ;; LOOPERS
+(kick-drum)
 ;(looper one-twenty-bpm kick-drum)
 ;;(looper one-twenty-bpm snare-drum)
 
