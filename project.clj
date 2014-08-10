@@ -11,5 +11,4 @@
                  [overtone/scsynth "3.5.7.0"]
                  [overtone/scsynth-extras "3.5.7.0"]
                  [clj-glob "1.0.0"]
-                 [monome-serial "0.3.1"]
-                 ])
+                 [monome-serial "0.3.2"]])
