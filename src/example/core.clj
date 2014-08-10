@@ -1,9 +1,10 @@
 (ns example.core
-  (:use [overtone.live])
+  (:use [overtone.live :exclude [clear]])
   (:use [overtone.sc.machinery.synthdef])
   (:use [clojure.pprint])
   (:use [clojure.core.match :only [match]])
-  (:use [polynome.core :as poly]))
+  (:use [polynome.core :as poly])
+  )
 
 ; ------------------------------------------------
 ; SYNTHS -----------------------------------------
@@ -13,7 +14,7 @@
         snd (sin-osc freq (* Math/PI 0.5))]
     (out 0 (pan2 (* snd env) 0))))
 
-(kick-drum)
+;(kick-drum)
 
 ; ------------------------------------------------
 ; METRONOMES -------------------------------------
