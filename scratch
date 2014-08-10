@@ -1,0 +1,112 @@
+
+; ------------------------------------------------
+; ------------------------------------------------
+; ------------------------------------------------
+;(demo 60
+      ;(let [bpm     120
+            ;;; create pool of notes as seed for random base line sequence
+            ;notes   [40 41 28 28 28 27 25 35 78]
+            ;;; create an impulse trigger firing once per bar
+            ;trig    (impulse:kr (/ bpm 120))
+            ;;; create frequency generator for a randomly picked note
+            ;freq    (midicps (lag (demand trig 0 (dxrand notes INF)) 0.25))
+            ;;; switch note durations
+            ;swr     (demand trig 0 (dseq [1 6 6 2 1 2 4 8 3 3] INF))
+            ;;; create a sweep curve for filter below
+            ;sweep   (lin-exp (lf-tri swr) -1 1 40 3000)
+            ;;; create a slightly detuned stereo sawtooth oscillator
+            ;wob     (mix (saw (* freq [0.99 1.01])))
+            ;;; apply low pass filter using sweep curve to control cutoff freq
+            ;wob     (lpf wob sweep)
+            ;;; normalize to 80% volume
+            ;wob     (* 0.8 (normalizer wob))
+            ;;; apply band pass filter with resonance at 5kHz
+            ;wob     (+ wob (bpf wob 1500 2))
+            ;;; mix in 20% reverb
+            ;wob     (+ wob (* 0.2 (g-verb wob 9 0.7 0.7)))
+
+            ;;; create impulse generator from given drum pattern
+            ;kickenv (decay (t2a (demand (impulse:kr (/ bpm 30)) 0 (dseq [1 0 0 0 0 0 1 0 1 0 0 1 0 0 0 0] INF))) 0.7)
+            ;;; use modulated sine wave oscillator
+            ;kick    (* (* kickenv 7) (sin-osc (+ 40 (* kickenv kickenv kickenv 200))))
+            ;;; clip at max volume to create distortion
+            ;kick    (clip2 kick 1)
+
+            ;;; snare is just using gated & over-amplified pink noise
+            ;snare   (* 3 (pink-noise) (apply + (* (decay (impulse (/ bpm 240) 0.5) [0.4 2]) [1 0.05])))
+            ;;; send through band pass filter with peak @ 2kHz
+            ;snare   (+ snare (bpf (* 4 snare) 2000))
+            ;;; also clip at max vol to distort
+            ;snare   (clip2 snare 1)]
+   ;;; mixdown & clip
+   ;(clip2 (+ wob kick snare) 1)))
+
+(stop)
+(definst steel-drum [note 60 amp 0.8]
+  (let [freq (midicps note)]
+    (* amp
+       (env-gen (perc 0.01 0.2) 1 1 0 1 :action FREE)
+       (+ (sin-osc (/ freq 2))
+          (rlpf (saw freq) (* 1.1 freq) 0.4)))))
+
+(definst saww [freq 220] (saw freq))
+(definst sinw [freq 220] (sin-osc freq))
+
+;(saww 220)
+;(sinw 220)
+
+;(kill saww)
+;(kill sinw)
+
+(defsynth monotron
+  "Korg Monotron from website diagram:
+   http://korg.com/services/products/monotron/monotron_Block_diagram.jpg."
+  [note     60            ; midi note value
+   volume   0.7           ; gain of the output
+   mod_pitch_not_cutoff 1 ; use 0 or 1 only to select LFO pitch or cutoff modification
+   pitch    0.0           ; frequency of the VCO
+   rate     4.0           ; frequency of the LFO
+   int      1.0           ; intensity of the LFO
+   cutoff   1000.0        ; cutoff frequency of the VCF
+   peak     0.5           ; VCF peak control (resonance)
+   pan      0             ; stereo panning
+   ]
+  (let [note_freq       (midicps note)
+        pitch_mod_coef  mod_pitch_not_cutoff
+        cutoff_mod_coef (- 1 mod_pitch_not_cutoff)
+        LFO             (* int (saw rate))
+        VCO             (saw (+ note_freq pitch (* pitch_mod_coef LFO)))
+        vcf_freq        (+ cutoff (* cutoff_mod_coef LFO) note_freq)
+        VCF             (moog-ff VCO vcf_freq peak)
+        ]
+    (out 0 (pan2 (* volume VCF) pan))))
+
+;; ======================================================================
+;; create an instance of the synth
+;(def N0 (monotron 40 0.8 1 0.0 2.5 350.0 800.0 3.0))
+
+;;; edit & C-x C-e on any these to play around
+;(ctl N0 :note   80)               ;; midi note value: 0 to 127
+;(ctl N0 :volume 0.7)              ;; gain of the output: 0.0 to 1.0
+;(ctl N0 :mod_pitch_not_cutoff 0)  ;; use 0 or 1 only to select LFO pitch or cutoff modification
+;(ctl N0 :pitch  10.0)             ;; this + note is frequency of the VCO
+;(ctl N0 :rate   1.5)              ;; frequency of the LFO
+;(ctl N0 :int    800.0)           ;; intensity of the LFO
+;(ctl N0 :cutoff 600.0)           ;; cutoff frequency of the VCF
+;(ctl N0 :peak   0.5)              ;; VCF peak control (resonance) 0.0 to 4.0
+
+(stop)
+
+; ------------------------------------------------
+; METRONOMES -------------------------------------
+; ------------------------------------------------
+(def one-twenty-bpm (metronome 120))
+
+; ------------------------------------------------
+; LOOPER -----------------------------------------
+; ------------------------------------------------
+(defn looper [nome sound]
+    (let [beat (nome)]
+        (at (nome beat) (sound))
+        (apply-by (nome (inc beat)) looper nome sound [])))
+
