@@ -1,11 +1,20 @@
 (ns example.core
-  (:use [overtone.live])
-  (:use [overtone.sc.machinery.synthdef])
+  ;(:use [overtone.live])
+  ;(:use [overtone.sc.machinery.synthdef])
   (:use [clojure.pprint])
-  (:use [monome-serial.core])
-  (:use [monome-serial.led]))
+  (:use [polynome.core :as poly])
+  ;(:use [monome-serial.core])
+  ;(:use [monome-serial.led])
+  )
 
-(def monome (Monome.))
+(def m (poly/init "/dev/tty.usbserial-m64-1113"))
+(poly/remove-all-callbacks m)
+
+(poly/toggle-led m 0 0)
+
+;(in-ns 'monome-serial.core)
+;(def monome (Monome. []))
+;(println monome)
 
 ;(defsynth kick-drum [amp 1 decay 0.8 freq 45 attack 10]
   ;(let [env (env-gen (perc 0 decay) 1 1 0 1 FREE)
