@@ -18,11 +18,11 @@
         env      (env-gen (perc attack decay peak) 1 1 0 1 FREE)]
     (out 0 (pan2 (* high-hat env) 0))))
 
-(definst kick-drum [amp 1 decay 0.8 freq 45 peak 1 attack 0.01]
+(definst kick-drum [amp 2 decay 0.8 freq 45 peak 1 attack 0.01]
   (let [env (env-gen (perc attack decay peak) 1 1 0 1 FREE)
-        enn (env-gen (asr 0.01 1 0.5))
+        ;enn (env-gen (asr 0.01 1 0.5))
         snd (sin-osc freq)]
-    (out 0 (pan2 (* snd env enn) 0))))
+    (out 0 (pan2 (* snd env) 0))))
 
 (kick-drum)
 
@@ -46,11 +46,11 @@
         snd (sin-osc (midicps note) (* Math/PI 0.5))]
     (out 0 (pan2 (* snd env) 0))))
 
-(definst spooky-house [freq 440 width 0.2 
+(definst spooky-house [note 60 freq 440 width 0.2 
                          attack 0.3 sustain 4 release 0.3 
                          vol 0.4] 
-  (* (env-gen (lin attack sustain release) 1 1 0 1 FREE)
-     (sin-osc (+ freq (* 20 (lf-pulse:kr 0.5 0 width))))
+  (* 
+     (sin-osc (+ (midicps note) (* 20 (lf-pulse:kr 0.5 0 width))))
      vol))
 
 (definst growl [note 30 amp 1 decay 0.8 freq 220 peak 1 attack 0.01]
@@ -58,33 +58,35 @@
         snd (triangle 500 2 2)]
     (out 0 (pan2 (* snd env) 0))))
 
-(growl)
+(stop)
+
+;(growl)
 
 
-(env-triangle 400)
+;(env-triangle 400)
 
 ; ------------------------------------------------
 ; MAIN->MONOME -----------------------------------
 ; ------------------------------------------------
-;(def m (poly/init "/dev/tty.usbserial-m64-1113"))
+(def m (poly/init "/dev/tty.usbserial-m64-1113"))
 
-;(poly/remove-all-callbacks m)
+(poly/remove-all-callbacks m)
 
-;(poly/toggle-led m 0 0)
+(poly/toggle-led m 0 0)
 
-;(poly/on-press m ::foo (fn [x y s]
-                         ;(match [x y]
-                           ;[0 0] (kick-drum)
-                           ;[0 1] (snare-drum)
-                           ;[0 2] (high-hat)
-                           ;[7 7] (beep 80)
-                           ;[7 6] (beep 82)
-                           ;[7 5] (beep 84)
-                           ;[7 4] (beep 85)
-                           ;[7 3] (beep 87)
-                           ;[7 2] (beep 89)
-                           ;[7 1] (beep 91)
-                           ;[7 0] (beep 92)
-                           ;)))
+(poly/on-press m ::foo (fn [x y s]
+                         (match [x y]
+                           [0 0] (kick-drum)
+                           [0 1] (snare-drum)
+                           [0 2] (high-hat)
+                           [7 7] (spooky-house 80)
+                           [7 6] (spooky-house 82)
+                           [7 5] (spooky-house 84)
+                           [7 4] (spooky-house 85)
+                           [7 3] (spooky-house 87)
+                           [7 2] (spooky-house 89)
+                           [7 1] (spooky-house 91)
+                           [7 0] (spooky-house 92)
+                           )))
 
 
