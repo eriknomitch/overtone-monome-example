@@ -1,14 +1,4 @@
-# example
+# Overtone/Monome Example
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure example app to get [Monome](http://monome.org/) working with [Overtone](http://overtone.github.io/).
 
-## Usage
-
-FIXME
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
